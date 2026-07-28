@@ -12,7 +12,7 @@ interface LoginResponse {
 
 export default function LoginScreen(): React.ReactElement{
     
-    const [email, setEmail] = useState<string>("")
+    const [username, setUsername] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [error, setError] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
@@ -20,20 +20,20 @@ export default function LoginScreen(): React.ReactElement{
 
     const handleLogin = async (): Promise<void> => {
         setError("");
-        if(!email || !password){
+        if(!username || !password){
             setError("Molim Vas ispunite sva polja.");
             return;
         }
 
     
         setLoading(true);
-        try{
+        try{ // salje djangu username i lozinku
             const res = await fetch(API_URL, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email,password}),
+                body: JSON.stringify({username,password}),
             });
-            const data: LoginResponse = await res.json();
+            const data: LoginResponse = await res.json(); // ceka na odgovor 
             if(!res.ok) {
                 setError(data.error || "Nesto nije uspijelo.")
             }else if (data.token){
@@ -50,7 +50,7 @@ export default function LoginScreen(): React.ReactElement{
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
         if (e.key === "Enter") handleLogin();
-    }
+    } 
 
 
     return (
@@ -72,19 +72,19 @@ export default function LoginScreen(): React.ReactElement{
             
             <form onSubmit={(e) => {e.preventDefault(); handleLogin(); }} style={styles.form}>
                 <div style={styles.fieldGroup}>
-                    <label style={styles.label}>Email adresa</label>
+                    <label style={styles.label}>Korisnicko ime</label>
                     <div style={styles.inputWrapper}>
-                        <span>
+                        <span style={styles.inputIcon}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                 <rect x="2" y="4" width="20" height="16" rx="2"/>
                                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                             </svg>
                         </span>
                         <input 
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
+                            type="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="username"
                             required
                             style={styles.input}
                             onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
@@ -180,8 +180,6 @@ const styles : Record<string, CSSProperties > = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #0f0c1a 0%, #1a1a2e 50%, #16213e 100%)",
-    fontFamily: "'DM Sans', sans-serif",
     padding: "24px",
     boxSizing: "border-box",
   },
