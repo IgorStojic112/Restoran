@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.http import JsonResponse
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import User
-from serializers import *
+from .serializers import *
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from django.core.exceptions import ValidationError
@@ -40,6 +41,7 @@ def register_view(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def user_info(request):
     users = User.objects.all()
     serializer = UserSerializer(users, many=True)
@@ -47,3 +49,22 @@ def user_info(request):
         return Response(serializer.data)
     else:
         return JsonResponse({'error': 'User not authenticated'}, status=401)
+    
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+
+    if user is None:
+        return Response({'error' : 'Pogresno ime ili lozinka'}, status=401)
+    
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token' : token.key, 'message' : 'Dobrodosli'})
+
+
+@api_view(['POST'])
+def logout(request):
+    request.user.auth_token.delete()
+    return Response({'message' : 'Loged out'})
