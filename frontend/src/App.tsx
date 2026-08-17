@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import Menu from './pages/Menu'
 import CreateMenuItem from './pages/CreateMenuItem';
 import AddIngredients from './pages/AddIngredinets';
+import MenuOrder from './pages/MenuOrder';
 
 // <Route path="/" element={<LoginScreen />} />
 
@@ -27,6 +28,7 @@ function App() {
         <Route path='/menu' element={<Menu />} />
         <Route path='/createMeniItem' element={<CreateMenuItem/>} />
         <Route path='/addIngredient' element={<AddIngredients />} />
+        <Route path='/menuOrder' element={<MenuOrder />} />
         
       </Routes>
     </BrowserRouter>

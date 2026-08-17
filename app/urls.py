@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/categories/', views.category_list, name='get_categories'),
     path('api/ingredient/', views.ingredient_list, name='get_ingredients'),
     path('api/ingredients/add', views.add_ingredients, name='add_ingredients'),
+    path('api/menu/list', views.menu_list, name='menu_list'),
 ]
