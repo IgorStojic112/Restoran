@@ -3,7 +3,7 @@ import { Bell, Moon, Search } from "lucide-react";
 import profileImage from "../assets/hero.png"
 import { useRef, useState } from "react";
 
-function SerchBar(){
+function SerchBar({ onSearch }){
     const [isExpanded, setIsExpanded] = useState(false);
     const inputRef = useRef(null);
 
@@ -19,6 +19,10 @@ function SerchBar(){
         }
     };
 
+    const handleChange = (e) => {
+        onSearch?.(e.target.value);
+    };
+
     return (
         <div
         onClick={handleExpand}
@@ -31,6 +35,7 @@ function SerchBar(){
                 type="text"
                 placeholder="Pretrazi"
                 onBlur={handleCollapse}
+                onChange={handleChange}
                 className={`bg-transparent outline-none ml-2 text-sm w-full transition-opacity duration-200
                     ${isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"}`} 
                 />
@@ -42,7 +47,7 @@ function SerchBar(){
 // <div className="flex-1 flex justify-center">Serch bar</div>
 // <li>Rezerviraj</li> <li>Meni</li>
 
-function NavBar() {
+function NavBar({ onSearch }) {
     
     return (
         <nav className="bg-white shadow">
@@ -65,7 +70,7 @@ function NavBar() {
                 </div>
                 
                 <div className="flex-1 flex justify-end mr-6">
-                    <SerchBar></SerchBar>
+                    <SerchBar onSearch={onSearch}></SerchBar>
                 </div>
                 
 
