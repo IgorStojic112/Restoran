@@ -156,7 +156,7 @@ export default function LoginScreen(): React.ReactElement{
 
             <p style={styles.signupPrompt}>
                 Don't have an account?{" "}
-                <a href="#" style={styles.signupLink}>Create one</a>
+                <a href="/register" style={styles.signupLink}>Create one</a>
             </p>
             
         </div>

@@ -16,7 +16,7 @@ function HomeScreen(){
     return (
         <div>
         
-            <NavBar></NavBar>
+            <NavBar onSearch={null}></NavBar>
 
 
             <div 

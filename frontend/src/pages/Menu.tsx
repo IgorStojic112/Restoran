@@ -4,8 +4,11 @@ import NavBar from "../components/NavBar";
 function Menu() {
 
     return (
+        
+        
+        
         <div>
-            <NavBar></NavBar>
+            <NavBar onSearch={null}></NavBar>
                 
 
 

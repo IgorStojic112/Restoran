@@ -40,7 +40,7 @@ export default function RegisterScreen(): React.ReactElement{
         try {
             const res = await fetch(API_URL,{
                 method: "POST",
-                headers : {"Constent-Type" : "application/json"},
+                headers : {"Content-Type" : "application/json"},
                 body : JSON.stringify({username,password,email})
             });
             const data: RegisterResponse = await res.json();
@@ -70,7 +70,7 @@ export default function RegisterScreen(): React.ReactElement{
                 <h1 style={styles.title}> Registrirajte se</h1>
             </div>
             
-            <form onSubmit={(e) => {e.preventDefault; handleRegister(); }} style={styles.form}>
+            <form onSubmit={(e) => {e.preventDefault(); handleRegister(); }} style={styles.form}>
                 <div style={styles.fieldGroup}>
                     <label style={styles.label}>Email adresa</label>
                     <div style={styles.inputWrapper}>
@@ -152,6 +152,7 @@ export default function RegisterScreen(): React.ReactElement{
                                 </svg>
                             )}
                         </button>
+                        
                     </div>
                 </div>
 
@@ -191,7 +192,15 @@ export default function RegisterScreen(): React.ReactElement{
                                 </svg>
                             )}
                         </button>
+                        
+                        
                     </div>
+                    
+                    <div style={styles.signupPrompt}>
+                        <a href="/login" style={styles.signupLink} >Nazad na login</a>
+                    </div>
+
+                    <button type="submit" style={styles.signupLink} >Registriraj se</button>
                 </div>
             </form>
 
@@ -296,4 +305,15 @@ const styles : Record<string, CSSProperties > = {
         alignItems: "center",
         padding: "4px",
     },
+    signupLink: {
+    fontWeight: "500",
+    textDecoration: "none",
+    },
+    signupPrompt: {
+    marginTop: "24px",
+    textAlign: "left",
+    fontSize: "13px",
+    color: "#8a8a99",
+    },
+
 }
