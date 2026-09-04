@@ -11,6 +11,7 @@ class User(AbstractUser):
     
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
+    profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.is_superuser:

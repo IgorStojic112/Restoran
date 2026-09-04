@@ -6,17 +6,18 @@ import SpecialityCard from "../components/SpecialityCard";
 import Chef from "../assets/Chef.jpg";
 import Pasta from "../assets/Pasta.jpg";
 import Restoran from "../assets/Restoran.jpg";
+import { useAuth } from "../context/AuthContex";
 
 // bg-white
 
 function HomeScreen(){
 
-    
+    const { user } = useAuth();
     
     return (
         <div>
         
-            <NavBar onSearch={null}></NavBar>
+            <NavBar onSearch={null} user={user}></NavBar>
 
 
             <div 

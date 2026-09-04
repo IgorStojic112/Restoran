@@ -1,9 +1,15 @@
 import { Bell, Moon, Search } from "lucide-react";
-
 import profileImage from "../assets/hero.png"
 import { useRef, useState } from "react";
+import { type User } from "../context/AuthContex";
+import { useNavigate } from "react-router-dom";
 
-function SerchBar({ onSearch }){
+interface NavBarProps {
+    onSearch: ((value: string) => void) | null;
+    user: User | null;
+}
+
+function SerchBar({ onSearch}){
     const [isExpanded, setIsExpanded] = useState(false);
     const inputRef = useRef(null);
 
@@ -47,7 +53,12 @@ function SerchBar({ onSearch }){
 // <div className="flex-1 flex justify-center">Serch bar</div>
 // <li>Rezerviraj</li> <li>Meni</li>
 
-function NavBar({ onSearch }) {
+function NavBar({ onSearch, user }: NavBarProps) {
+    
+    const navigate = useNavigate();
+    
+
+    
     
     return (
         <nav className="bg-white shadow">
@@ -77,12 +88,26 @@ function NavBar({ onSearch }) {
                 <ul className="ml-auto flex gap-8 items-center mr-4"> 
                     <li> <Moon className=""></Moon> </li>
                     <li> <Bell></Bell> </li>
-                    <li> 
-                        <img 
+                    <li>
+                        {user ? (
+                            <img 
                             src={profileImage}
                             alt="profile"
                             className="w-10 h-10 rounded-full object-cover"
-                        /> 
+                            />
+
+                        ) : (
+                            <button 
+                                onClick={() => navigate("/login") }
+                                className="text-sm font-medium px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                                >
+                                
+                                Log in
+                            </button>
+                        )
+
+                        }
+                         
                     </li>
                 </ul>
             </div>          

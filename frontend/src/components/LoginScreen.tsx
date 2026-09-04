@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { CSSProperties , KeyboardEvent } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContex";
 
 const API_URL = "http://localhost:8000/accounts/login/"
 
@@ -18,6 +20,9 @@ export default function LoginScreen(): React.ReactElement{
     const [loading, setLoading] = useState<boolean>(false)
     const [showPassword, setShowPassword] = useState<boolean>(false)
 
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
     const handleLogin = async (): Promise<void> => {
         setError("");
         if(!username || !password){
@@ -27,7 +32,18 @@ export default function LoginScreen(): React.ReactElement{
 
     
         setLoading(true);
-        try{ // salje djangu username i lozinku
+        
+        try {
+            await login(username, password); // USE THIS instead of manual fetch
+            navigate("/home");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Nesto nije uspijelo.");
+        } finally {
+            setLoading(false);
+        }
+        /*
+        
+        try{ 
             const res = await fetch(API_URL, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -39,13 +55,15 @@ export default function LoginScreen(): React.ReactElement{
             }else if (data.token){
                 localStorage.setItem("token",data.token);
                 alert(`Dobrodosli! Token je spasen. Poruka: ${data.message}`)
-                // To do redirect to dashboard 
+                // To do redirect to dashboard
+                navigate("/home");
             }
         } catch (err: unknown){
             setError("Ne moze se pristupiti serveru. Django je li upaljen.")
         }finally{
             setLoading(false);
             }
+        */
     };
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
