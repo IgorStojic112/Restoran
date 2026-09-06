@@ -82,7 +82,7 @@ def change_password(request):
     
     user = request.user
 
-    old_password = request.data.get('password')
+    old_password = request.data.get('old_password')
     new_password = request.data.get('new_password')
 
     if not old_password or not new_password:
@@ -92,7 +92,7 @@ def change_password(request):
         return Response({'error' : 'Stara lozinka nije ispravan'}, status=400)
 
     if old_password == new_password:
-        return Response({'error': 'Nova loznika ne moze biti ista kao i stara'})
+        return Response({'error': 'Nova loznika ne moze biti ista kao i stara'}, status=400)
 
     try:
         validate_password(new_password)

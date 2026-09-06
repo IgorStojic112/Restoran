@@ -1,8 +1,11 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import render
 from .serializers import MenuItemSerializer, CategorySerializer, IngredientSerializer
-from .models import MeniItem, Category, Ingredient
+from .models import MeniItem, Category, Ingredient, Order, OrderItem
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from decimal import Decimal
 
 
 def home(request):
@@ -92,4 +95,52 @@ def add_ingredients(request):
     
     return Response(serializer.errors,status=400)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+
+    items = request.data.get("items")
+
+    if not items:
+        return Response( {"error": "Naruzba je prazna"}, status=status.HTTP_400_BAD_REQUEST)
+
+    total_price = Decimal("0.00")
+    order = Order.objects.create(
+        user=request.user,
+        total_price=Decimal(0.00)
+    )
+
+    for item in items:
+        menu_item_id = item.get("menu_item")
+        quantity = item.get("quantity")
+
+        try:
+            menu_item = MeniItem.objects.get(id=menu_item_id)
+        except MeniItem.DoesNotExist:
+            order.delete()
+            return Response({"error": f"Stvar sa mnenia {menu_item_id} ne postoji"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        item_price = menu_item.Price
+
+        OrderItem.objects.create(
+            order=order,
+            menu_item=menu_item,
+            quantity=quantity,
+            price=item_price,
+        )
+
+        total_price += item_price * quantity
+    
+    order.total_price = total_price
+    order.save()
+
+    return Response({
+        "message": "Narudzba uspjesno predana",
+        "order_id": order.id,
+        "total_price": order.total_price 
+    },
+    status=status.HTTP_201_CREATED
+    )
+
+    
 

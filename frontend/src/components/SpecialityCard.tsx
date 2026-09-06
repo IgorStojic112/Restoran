@@ -1,7 +1,7 @@
 
 
 
-function SpecialityCard({image,title,description}){    
+function SpecialityCard({image,title,description, price }){    
 
     return (
         <div className="rounded-lg shadow-lg overflow-hidden bg-white">
@@ -12,6 +12,9 @@ function SpecialityCard({image,title,description}){
                 </h3>
                 <p className="text-gray-600 mt-2">
                     {description}
+                </p>
+                <p className="text-gray-600 mt-2">
+                    {price}
                 </p>
             </div>
         </div>

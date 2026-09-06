@@ -1,7 +1,7 @@
 import { Bell, Moon, Search } from "lucide-react";
 import profileImage from "../assets/hero.png"
 import { useRef, useState } from "react";
-import { type User } from "../context/AuthContex";
+import { type User, useAuth } from "../context/AuthContex";
 import { useNavigate } from "react-router-dom";
 
 interface NavBarProps {
@@ -53,11 +53,12 @@ function SerchBar({ onSearch}){
 // <div className="flex-1 flex justify-center">Serch bar</div>
 // <li>Rezerviraj</li> <li>Meni</li>
 
-function NavBar({ onSearch, user }: NavBarProps) {
+function NavBar({ onSearch }: NavBarProps) { // user bio unutra
     
     const navigate = useNavigate();
-    
+    const [profileOpen, setProfileOpen] = useState(false);
 
+    const { user, logout } = useAuth();
     
     
     return (
@@ -70,8 +71,8 @@ function NavBar({ onSearch, user }: NavBarProps) {
                     </div>
 
                     <ul className="hidden lg:flex gap-8 whitespace-nowrap">
-                        <li>Dashborad</li>
-                        <li> Narudzba</li>
+                        <li onClick={() => {navigate('/home')}}>Dashborad</li>
+                        <li onClick={() => {navigate('/OrderPage')}}> Narudzba</li>
                         <li>AI asistent</li>
                         <li>Naoredna pretraga</li>
                         <li>O nama</li>
@@ -90,11 +91,47 @@ function NavBar({ onSearch, user }: NavBarProps) {
                     <li> <Bell></Bell> </li>
                     <li>
                         {user ? (
-                            <img 
-                            src={profileImage}
-                            alt="profile"
-                            className="w-10 h-10 rounded-full object-cover"
-                            />
+                            
+                            <div className="relative">
+                                
+                                <button onClick={() => setProfileOpen(!profileOpen)}>
+
+                                    <img 
+                                        src={profileImage}
+                                        alt="profile"
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                </button>
+
+                                {profileOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                        
+                                        <button
+                                        onClick={ () => navigate('/profilePage')}
+                                        className="w-full text-left px-4 py-3 hover:bg-gray-100">
+                                            Profile
+                                        </button>
+                                        
+                                        <button
+                                        className="w-full text-left px-4 py-3 hover:bg-gray-100"
+                                        >
+                                            Settings
+                                        </button>
+                                        
+                                        <button
+                                        onClick={ async () => {
+                                            await logout();
+                                            setProfileOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-3 hover:bg-gray-100"
+                                        >
+                                            Log out
+                                        </button>
+                                    </div>
+                                )}
+
+                            </div>
+                            
 
                         ) : (
                             <button 

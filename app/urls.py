@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/ingredient/', views.ingredient_list, name='get_ingredients'),
     path('api/ingredients/add', views.add_ingredients, name='add_ingredients'),
     path('api/menu/list', views.menu_list, name='menu_list'),
+    path('api/orders/create', views.create_order, name='create_order'),
 ]

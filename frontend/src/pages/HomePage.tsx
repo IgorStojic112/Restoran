@@ -7,12 +7,14 @@ import Chef from "../assets/Chef.jpg";
 import Pasta from "../assets/Pasta.jpg";
 import Restoran from "../assets/Restoran.jpg";
 import { useAuth } from "../context/AuthContex";
+import { useNavigate } from "react-router-dom";
 
 // bg-white
 
 function HomeScreen(){
 
     const { user } = useAuth();
+    const navigator = useNavigate();
     
     return (
         <div>
@@ -47,7 +49,10 @@ function HomeScreen(){
                             Reserve a Table
                         </button>
 
-                        <button className="mt-6 border-2 border-white text-white px-8 py-3 rounded-full hover:bg-white hover:text-black transition-all duration-300">
+                        <button 
+                            className="mt-6 border-2 border-white text-white px-8 py-3 rounded-full hover:bg-white hover:text-black transition-all duration-300"
+                            onClick={ () => {navigator('/menuOrder')}}
+                        >
                             View Menu
                         </button>
                     </div>
@@ -66,9 +71,9 @@ function HomeScreen(){
                 }}>
                 <h2 className="text-4xl font-bold text-center mb-12">Nasi specijaliteti</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mr-10 ml-10">
-                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce."/>  
-                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce."/>  
-                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce."/>  
+                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
+                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
+                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
                 </div>
             </div>
 

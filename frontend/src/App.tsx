@@ -10,6 +10,8 @@ import Menu from './pages/Menu'
 import CreateMenuItem from './pages/CreateMenuItem';
 import AddIngredients from './pages/AddIngredinets';
 import MenuOrder from './pages/MenuOrder';
+import ProfilePage from './pages/ProfilePage';
+import OrderPage from './pages/OrderPage';
 
 // <Route path="/" element={<LoginScreen />} />
 
@@ -22,14 +24,16 @@ function App() {
       
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen/>} />
-        <Route path='/nav' element={<NavBar/>} />
+        <Route path='/nav' element={<NavBar onSearch={null} user={null}/>} />
         <Route path='/Home' element={<HomePage />} />
         <Route path='/footer' element={<Footer />} />
         <Route path='/menu' element={<Menu />} />
         <Route path='/createMeniItem' element={<CreateMenuItem/>} />
         <Route path='/addIngredient' element={<AddIngredients />} />
         <Route path='/menuOrder' element={<MenuOrder />} />
-        
+        <Route path='/profilePage' element={<ProfilePage />} />
+        <Route path='/OrderPage' element={<OrderPage />} />
+
       </Routes>
     </BrowserRouter>
     

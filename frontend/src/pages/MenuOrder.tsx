@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import SpecialityCard from "../components/SpecialityCard";
+import { useAuth } from "../context/AuthContex";
+import { useCart } from "../context/CartContext";
 
 function MenuOrder () {
 
+    const { user } = useAuth();
     const [items, setItems] = useState([]);
     const [category, setCategory] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+
+    const {cart, addToCart} = useCart();
+
+
 
     useEffect(() => {
         fetch("http://localhost:8000/api/categories/")
@@ -28,13 +35,11 @@ function MenuOrder () {
         .filter((item) => item.Name.toLowerCase().includes(searchTerm.toLowerCase())
         );
         
-
-    
     
 
     return (
         <div>
-            <NavBar onSearch={setSearchTerm}></NavBar>
+            <NavBar onSearch={setSearchTerm} user={user}></NavBar>
 
             <div className="flex min-h-screen">
                 
@@ -71,14 +76,22 @@ function MenuOrder () {
                 <div className="flex-1 ">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
                         {filterdItems.map(item => {
-                            console.log(item)
+                            // console.log(item)
                             return(
-                                <SpecialityCard 
+                                <div 
                                     key={item.id}
-                                    image={`http://localhost:8000/${item.Image}`}
-                                    title={item.Name}
-                                    description={item.Description}
-                                />
+                                    onClick={ () => addToCart(item)}
+                                    className="cursor-pointer"
+                                >
+                                    
+                                    <SpecialityCard 
+                                        
+                                        image={`http://localhost:8000/${item.Image}`}
+                                        title={item.Name}
+                                        description={item.Description}
+                                        price={item.Price}
+                                    />
+                                </div>
                             );
                         })}
                     </div>
