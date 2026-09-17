@@ -20,7 +20,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fileds = ["menu_item", "quantity", "price"]
+        fields = ["menu_item", "quantity", "price"]
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
