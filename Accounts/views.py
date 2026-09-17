@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import get_user_model
 from django.core.validators import validate_email
+from .serializers import UserSerializer, LoginSerializer, UserProfileSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -142,3 +143,17 @@ def change_email(request):
     update_session_auth_hash(request,user)
 
     return Response({'message': 'Uspjesno promjenjena email adressa'})
+
+@api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    user = request.user
+    if request.method == "GET":
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
+
+    serializer = UserProfileSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)

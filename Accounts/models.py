@@ -13,6 +13,14 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
     profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
 
+    dietary_preferences = models.TextField(blank=True, default="")
+    allergies = models.ManyToManyField(
+        "app.Ingredient",
+        blank=True,
+        related_name="allergic_users",
+        limit_choices_to={"is_allergen": True},
+    )
+
     def save(self, *args, **kwargs):
         if self.is_superuser:
             self.role = self.Role.ADMIN
