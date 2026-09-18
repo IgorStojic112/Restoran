@@ -3,13 +3,14 @@ import profileImage from "../assets/hero.png"
 import { useRef, useState } from "react";
 import { type User, useAuth } from "../context/AuthContex";
 import { useNavigate } from "react-router-dom";
+import { useNotifications } from "../context/NotificationContext";
 
 interface NavBarProps {
     onSearch: ((value: string) => void) | null;
     user: User | null;
 }
 
-function SerchBar({ onSearch}){
+function SerchBar({ onSearch, user}){
     const [isExpanded, setIsExpanded] = useState(false);
     const inputRef = useRef(null);
 
@@ -57,6 +58,8 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
     
     const navigate = useNavigate();
     const [profileOpen, setProfileOpen] = useState(false);
+    const { notifications, unreadCount, markAllRead } = useNotifications();
+    const [bellOpen, setBellOpen] = useState(false);
 
     const { user, logout } = useAuth();
     
@@ -88,7 +91,42 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
 
                 <ul className="ml-auto flex gap-8 items-center mr-4"> 
                     <li> <Moon className=""></Moon> </li>
-                    <li> <Bell></Bell> </li>
+                    <li className="relative">
+                        <button
+                            onClick={() => {
+                            setBellOpen(!bellOpen);
+                            if (!bellOpen) markAllRead();
+                            }}
+                            className="relative p-1"
+                        >
+                            <Bell className="w-5 h-5" />
+                            {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                                {unreadCount > 9 ? "9+" : unreadCount}
+                            </span>
+                            )}
+                        </button>
+
+                        {bellOpen && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                            <div className="px-4 py-3 border-b border-gray-100 text-sm font-medium">
+                                Obavijesti
+                            </div>
+                            {notifications.length === 0 ? (
+                                <div className="px-4 py-8 text-sm text-gray-400 text-center">
+                                Nema obavijesti
+                                </div>
+                            ) : (
+                                notifications.map(n => (
+                                <div key={n.id} className="px-4 py-3 border-b border-gray-50 last:border-0">
+                                    <p className="text-sm font-medium text-gray-900">{n.message}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Narudžba #{n.order_id}</p>
+                                </div>
+                                ))
+                            )}
+                            </div>
+                        )}
+                        </li>
                     <li>
                         {user ? (
                             

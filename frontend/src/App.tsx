@@ -6,36 +6,39 @@ import RegisterScreen from './components/RegisterScreen';
 import NavBar from './components/NavBar';
 import HomePage from './pages/HomePage';
 import Footer from './components/Footer';
-import Menu from './pages/Menu'
+{/*import Menu from './pages/Menu'*/}
 import CreateMenuItem from './pages/CreateMenuItem';
 import AddIngredients from './pages/AddIngredinets';
 import MenuOrder from './pages/MenuOrder';
 import ProfilePage from './pages/ProfilePage';
 import OrderPage from './pages/OrderPage';
 
+import { NotificationProvider } from "./context/NotificationContext";
 // <Route path="/" element={<LoginScreen />} />
 
 function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        
-      
-        <Route path="/login" element={<LoginScreen />} />
-        <Route path="/register" element={<RegisterScreen/>} />
-        <Route path='/nav' element={<NavBar onSearch={null} user={null}/>} />
-        <Route path='/Home' element={<HomePage />} />
-        <Route path='/footer' element={<Footer />} />
-        <Route path='/menu' element={<Menu />} />
-        <Route path='/createMeniItem' element={<CreateMenuItem/>} />
-        <Route path='/addIngredient' element={<AddIngredients />} />
-        <Route path='/menuOrder' element={<MenuOrder />} />
-        <Route path='/profilePage' element={<ProfilePage />} />
-        <Route path='/OrderPage' element={<OrderPage />} />
+        <NotificationProvider>
+          <Routes>
+            
+          
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/register" element={<RegisterScreen/>} />
+            <Route path='/nav' element={<NavBar onSearch={null} user={null}/>} />
+            <Route path='/Home' element={<HomePage />} />
+            <Route path='/footer' element={<Footer />} />
+            {/*<Route path='/menu' element={<Menu />} />*/}
+            <Route path='/createMeniItem' element={<CreateMenuItem/>} />
+            <Route path='/addIngredient' element={<AddIngredients />} />
+            <Route path='/menuOrder' element={<MenuOrder />} />
+            <Route path='/profilePage' element={<ProfilePage />} />
+            <Route path='/OrderPage' element={<OrderPage />} />
 
-      </Routes>
-    </BrowserRouter>
+          </Routes>
+        </NotificationProvider>
+      </BrowserRouter>
     
   )
 }

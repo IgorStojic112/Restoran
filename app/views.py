@@ -7,6 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from decimal import Decimal
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 def home(request):
     return render(request, 'home.html') #, {'form': form} 
@@ -142,5 +145,42 @@ def create_order(request):
     status=status.HTTP_201_CREATED
     )
 
-    
+STATUS_MESSAGES = {
+    "PENDING":        "Vaša narudžba je primljena",
+    "PREPARING": "Vaša narudžba se priprema",
+    "READY":          "Vaša narudžba je gotova",
+    "COMPLETED":      "Narudžba je predana, dobar tek!",
+    "CANCELLED":      "Vaša narudžba je otkazana",
+}
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_order_status(request, order_id):
+    try:
+        order = Order.objects.select_related("user").get(id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=404)
+
+    new_status = request.data.get("status")
+    if new_status not in STATUS_MESSAGES:
+        return Response(
+            {"error": f"Invalid status. Choose from: {list(STATUS_MESSAGES.keys())}"},
+            status=400
+        )
+
+    order.status = new_status
+    order.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{order.user.id}",
+        {
+            "type": "order_status_update",
+            "order_id": order.id,
+            "status": order.status,
+            "message": STATUS_MESSAGES[new_status],
+        }
+    )
+
+    return Response({"order_id": order.id, "status": order.status})
 
