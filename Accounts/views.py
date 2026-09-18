@@ -1,5 +1,5 @@
 from .forms import *
-from django.contrib.auth import authenticate, login as auth_login , logout
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.contrib import messages
 from django.http import JsonResponse
@@ -73,7 +73,7 @@ def login_view(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def logout(request):
+def logout_view(request):
     request.user.auth_token.delete()
     return Response({'message' : 'Loged out'})
 
