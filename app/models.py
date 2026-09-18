@@ -15,11 +15,17 @@ class Category(models.Model):
     Name = models.CharField(max_length=20, unique=True)
     Description = models.CharField(max_length=120, blank=True)
 
+    def __str__(self):
+        return self.Name
+
 class Ingredient(models.Model):
     Name = models.CharField(max_length=20, unique=True)
     is_allergen = models.BooleanField()
     is_vegetarian = models.BooleanField()
     is_vegan = models.BooleanField()
+
+    def __str__(self):
+        return self.Name
 
 class MeniItem(models.Model):
     Name = models.CharField(max_length=20)
@@ -38,6 +44,9 @@ class MeniItem(models.Model):
         Ingredient,
         related_name="menu_items"
     )
+
+    def __str__(self):
+        return self.Name
 
 
 class Order(models.Model):
@@ -69,6 +78,9 @@ class Order(models.Model):
         decimal_places=2
     )
 
+    def __str__(self):
+        return f"Order #{self.id} — {self.user.username}"
+
 class OrderItem(models.Model):
 
     order = models.ForeignKey(
@@ -88,3 +100,6 @@ class OrderItem(models.Model):
         max_digits=6,
         decimal_places=2
     )
+
+    def __str__(self):
+        return f"{self.menu_item.Name} x{self.quantity}"
