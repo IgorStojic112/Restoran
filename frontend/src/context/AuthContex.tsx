@@ -5,7 +5,7 @@ export interface User {
     id: number;
     username: string;
     email: string;
-    // profileImage: string;
+    profileImage: string | null;
 }
 
 interface AuthResponse {
@@ -27,12 +27,14 @@ interface AuthContextType {
         email: string,
         password: string
     ) => Promise<AuthResponse>;
-    logout: () => Promise<void>
+    logout: () => Promise<void>;
+    uploadProfileImage: (file: File) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const API_BASE = "http://localhost:8000/accounts";
+
 
 
 export function AuthProvider({ children } : { children: ReactNode }) {
@@ -137,10 +139,30 @@ export function AuthProvider({ children } : { children: ReactNode }) {
         setUser(null);
     }
 
+    const uploadProfileImage = async(file: File): Promise<void> => {
+        if(!token) return;
+
+        const formData = new FormData();
+        formData.append("profile_image", file);
+
+        const res = await fetch(`${API_BASE}/profile-image/`, {
+            method: "POST",
+            headers: { Authorization: `Token ${token}`},
+            body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || "Update failed");
+        }
+        setUser(data as User);
+
+    }
+
     return (
     
         <AuthContext.Provider
-            value={{ user, token, loading, login, register, logout }}
+            value={{ user, token, loading, login, register, logout, uploadProfileImage}}
         >
             {children}
         </AuthContext.Provider>

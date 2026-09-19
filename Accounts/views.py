@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.contrib import messages
 from django.http import JsonResponse
-from rest_framework.decorators import api_view , permission_classes
+from rest_framework.decorators import api_view , permission_classes , parser_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import User
@@ -15,6 +15,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import get_user_model
 from django.core.validators import validate_email
 from .serializers import UserSerializer, LoginSerializer, UserProfileSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -47,14 +48,25 @@ def register_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_info(request):
-    # users = User.objects.all()
-    # serializer = UserSerializer(users, many=True)
-    serializer = UserSerializer(request.user)
-    # if request.user.is_authenticated:
-        # return Response(serializer.data)
-    # else:
-        # return JsonResponse({'error': 'User not authenticated'}, status=401)
+    serializer = UserSerializer(request.user, context={"request" : request})
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def upload_profile_image(request):
+    file = request.FILES.get("profile_image")
+    if not file:
+        return Response({"error" : "No image provided"}, status=400)
+    
+    request.user.profile_image = file
+    request.user.save()
+
+    serializer = UserSerializer(request.user, context={"request": request})
+    return Response(serializer.data)
+                         
+
     
 @api_view(['POST'])
 @permission_classes([AllowAny])

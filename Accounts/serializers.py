@@ -4,9 +4,14 @@ from app.models import Ingredient
 from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
+    
+    profileImage = serializers.ImageField(source='profile_image', read_only=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email', 'profileImage']
+
+    
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()

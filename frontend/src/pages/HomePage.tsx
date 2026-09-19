@@ -71,9 +71,9 @@ function HomeScreen(){
                 }}>
                 <h2 className="text-4xl font-bold text-center mb-12">Nasi specijaliteti</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mr-10 ml-10">
-                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
-                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
-                    <SpecialityCard image="" title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
+                    <SpecialityCard image={Pasta} title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
+                    <SpecialityCard image={Pasta} title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
+                    <SpecialityCard image={Pasta} title="Margariata pizza" description="Fresh mozarella, basil and tomato sauce." price={null}/>  
                 </div>
             </div>
 

@@ -85,7 +85,7 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
                 </div>
                 
                 <div className="flex-1 flex justify-end mr-6">
-                    <SerchBar onSearch={onSearch}></SerchBar>
+                    <SerchBar onSearch={onSearch} user={user}></SerchBar>
                 </div>
                 
 
@@ -135,7 +135,7 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
                                 <button onClick={() => setProfileOpen(!profileOpen)}>
 
                                     <img 
-                                        src={profileImage}
+                                        src={user.profileImage || profileImage}
                                         alt="profile"
                                         className="w-10 h-10 rounded-full object-cover"
                                     />
