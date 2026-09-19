@@ -13,7 +13,7 @@ from Accounts.models import User
 
 class Category(models.Model):
     Name = models.CharField(max_length=20, unique=True)
-    Description = models.CharField(max_length=120, blank=True)
+    Description = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.Name
@@ -29,7 +29,7 @@ class Ingredient(models.Model):
 
 class MeniItem(models.Model):
     Name = models.CharField(max_length=20)
-    Description = models.CharField(max_length=120)
+    Description = models.TextField(blank=True, default="")
     Price = models.DecimalField(max_digits=6, decimal_places=2)
     Image = models.ImageField(upload_to="menu/")
     Available = models.BooleanField(default=True)
