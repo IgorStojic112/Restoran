@@ -65,7 +65,7 @@ function MenuOrder() {
               className="cursor-pointer"
             >
               <SpecialityCard
-                image={`http://localhost:8000/${item.Image}`}
+                image={`http://localhost:8000${item.Image}`}
                 title={item.Name}
                 description={item.Description}
                 price={item.Price}
