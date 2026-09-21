@@ -1,13 +1,9 @@
 import React, { use, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContex"
 
 const API_URL = "http://localhost:8000/accounts/register/"
 
-interface RegisterResponse {
-    token? : string;
-    message? : string;
-    error? : string;
-}
 
 export default function RegisterScreen(): React.ReactElement{
     
@@ -16,13 +12,16 @@ export default function RegisterScreen(): React.ReactElement{
     const [password,setPassword] = useState<string>("")
     const [comfirmPassword,setComfirmPassword] = useState<string>("")
     const [error, setError] = useState<string>("")
-    const [loading, setLoading] = useState<boolean>(true)
+    const [success, setSuccess] = useState<string>("")
+    const [loading, setLoading] = useState<boolean>(false)
     const [showPassword, setShowPassword] = useState<boolean>(false)
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { register } = useAuth();
     
     const handleRegister = async (): Promise<void> => {
         setError("");
+        setSuccess("");
         
         if(!username || !password || !email || !comfirmPassword){
             setError("Molimo Vas popunite sva polja ");
@@ -37,30 +36,31 @@ export default function RegisterScreen(): React.ReactElement{
             return;
         }
 
-        try {
+        setLoading(true);
+
+        try {/*
             const res = await fetch(API_URL,{
                 method: "POST",
                 headers : {"Content-Type" : "application/json"},
-                body : JSON.stringify({username,password,email})
-            });
-            const data: RegisterResponse = await res.json();
+                body : JSON.stringify({username,password,email}) */
 
-            if(!res.ok) {
-                setError("Nesto nije uspijelo")
-            }else if (data.token) {
-                localStorage.setItem("token",data.token);
-                alert(`Dobrodosli! Token je spasen. Poruka: ${data.message}`)
-                navigate('/login')
+                const res = await register(username, email,password);
+                setSuccess(res.message || "Racun je uspjesno napravljen! ");
+                setTimeout(() => navigate("/home"), 2000);
+            } catch (err){
+                if (err instanceof TypeError) {
+                    setError("Ne moze se pristupiti serveru")
+                } else {
+                    setError(
+                        err instanceof Error && err.message
+                        ? err.message
+                        : "Nesto nije uspijelo."
+                    );
+                }
+            } finally {
+                setLoading(false);
             }
-
-        }catch(err : unknown){
-            setError("Ne moze se pristupiti serveru")
-        }finally {
-            setLoading(false);
-        }
-
-
-
+            
     }
     
     return (
@@ -195,12 +195,35 @@ export default function RegisterScreen(): React.ReactElement{
                         
                         
                     </div>
-                    
-                    <div style={styles.signupPrompt}>
-                        <a href="/login" style={styles.signupLink} >Nazad na login</a>
-                    </div>
 
-                    <button type="submit" style={styles.signupLink} >Registriraj se</button>
+                    {error && (
+                        <div role="alert" style={styles.errorBox}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>{error}</span>
+                        </div>
+                    )}
+                    {success && (
+                    <div role="status" style={styles.successBox}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <span>{success} Preusmjeravanje…</span>
+                    </div>
+                    )}
+                    
+                    
+                </div>
+                
+
+                <button type="submit" style={styles.submitBtn} disabled={loading || !!success}> {loading ? "Registracija.." : "Registriraj se"}</button>
+
+                <div style={styles.signupPrompt}>
+                    <a href="/login" style={styles.signupLink} >Nazad na login</a>
                 </div>
             </form>
 
@@ -314,6 +337,44 @@ const styles : Record<string, CSSProperties > = {
     textAlign: "left",
     fontSize: "13px",
     color: "#8a8a99",
+    },
+    inputFocus: {
+        borderColor: "#1a1a2e",
+    },
+    errorBox: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "10px 14px",
+        borderRadius: "8px",
+        background: "#fdecea",
+        color: "#b3261e",
+        border: "1px solid #f5c2c0",
+        fontSize: "14px",
+        fontFamily: "'DM Sans', sans-serif",
+    },
+    successBox: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "10px 14px",
+        borderRadius: "8px",
+        background: "#e8f5e9",
+        color: "#1b5e20",
+        border: "1px solid #b7dfb9",
+        fontSize: "14px",
+        fontFamily: "'DM Sans', sans-serif",
+    },
+    submitBtn: {
+        height: "44px",
+        border: "none",
+        borderRadius: "10px",
+        background: "#1a1a2e",
+        color: "#e8c97e",
+        fontSize: "14px",
+        fontWeight: "500",
+        cursor: "pointer",
+        fontFamily: "'DM Sans', sans-serif",
     },
 
 }

@@ -1,11 +1,14 @@
-import { User } from "lucide-react";
+// import { User } from "lucide-react";
 import {createContext, useContext, useEffect, useState, type ReactNode} from "react"
+
+export type Role = "ADMIN" | "STAFF" | "CUSTOMER";
 
 export interface User {
     id: number;
     username: string;
     email: string;
     profileImage: string | null;
+    role: Role;
 }
 
 interface AuthResponse {

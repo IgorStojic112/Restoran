@@ -37,7 +37,7 @@ export default function LoginScreen(): React.ReactElement{
             await login(username, password); // USE THIS instead of manual fetch
             navigate("/home");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Nesto nije uspijelo.");
+            setError(err instanceof Error && err.message ? err.message : "Nesto nije uspijelo.");
         } finally {
             setLoading(false);
         }
@@ -101,8 +101,8 @@ export default function LoginScreen(): React.ReactElement{
                         <input 
                             type="username"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="username"
+                            onChange={(e) => { setUsername(e.target.value); if(error) setError("");} }
+                            placeholder="username"  
                             required
                             style={styles.input}
                             onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
@@ -152,6 +152,18 @@ export default function LoginScreen(): React.ReactElement{
                         </button>
                     </div>
                 </div>
+                
+                {error && (
+                  <div role="alert" style={styles.errorBox}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <span>{error}</span>
+                  </div>
+                )}
+
 
                 <button 
                 type="submit" 
@@ -367,6 +379,18 @@ const styles : Record<string, CSSProperties > = {
     fontWeight: "500",
     textDecoration: "none",
   },
+  errorBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "10px 14px",
+    borderRadius: "8px",
+    background: "#fdecea",
+    color: "#b3261e",
+    border: "1px solid #f5c2c0",
+    fontSize: "14px",
+    fontFamily: "'DM Sans', sans-serif",
+},
   
 }
 

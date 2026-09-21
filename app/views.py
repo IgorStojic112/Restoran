@@ -48,6 +48,7 @@ def ingredient_list(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_meni_item(request):
     
     data = request.data

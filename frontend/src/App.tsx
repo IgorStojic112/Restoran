@@ -14,6 +14,7 @@ import ProfilePage from './pages/ProfilePage';
 import OrderPage from './pages/OrderPage';
 
 import { NotificationProvider } from "./context/NotificationContext";
+import ProtectedRoute from './components/ProtectedRoute';
 // <Route path="/" element={<LoginScreen />} />
 
 function App() {
@@ -30,8 +31,12 @@ function App() {
             <Route path='/Home' element={<HomePage />} />
             <Route path='/footer' element={<Footer />} />
             {/*<Route path='/menu' element={<Menu />} />*/}
-            <Route path='/createMeniItem' element={<CreateMenuItem/>} />
-            <Route path='/addIngredient' element={<AddIngredients />} />
+            
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN","STAFF"]} /> }>
+              <Route path='/createMeniItem' element={<CreateMenuItem/>} />
+              <Route path='/addIngredient' element={<AddIngredients />} />
+            </Route>
+            
             <Route path='/menuOrder' element={<MenuOrder />} />
             <Route path='/profilePage' element={<ProfilePage />} />
             <Route path='/OrderPage' element={<OrderPage />} />

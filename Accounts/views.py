@@ -25,12 +25,12 @@ def register_view(request):
     password = request.data.get('password')
 
     if not username or not email or not password:
-        return Response({'error' : 'Username, email and password are rquired'}, status=400)
+        return Response({'error' : 'Korisnicko ime, email i lozinka su potrebni'}, status=400)
     
     if User.objects.filter(username=username).exists():
-        return Response({'error' : 'Username already exists'}, status=400)
+        return Response({'error' : 'Korisnicko ime vec postoji'}, status=400)
     if User.objects.filter(email=email).exists():
-        return Response({'error' : 'Email already exists'}, status=400)
+        return Response({'error' : 'Email vec postoji'}, status=400)
     
     try:
         validate_password(password)
