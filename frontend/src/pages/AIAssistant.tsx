@@ -13,7 +13,7 @@ interface Recommendation {
 }
 
 function AIAssistant() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [message, setMessage] = useState("");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,9 +29,12 @@ function AIAssistant() {
     setRecommendations([]);
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Token ${token}`;
+
       const response = await fetch("http://localhost:8000/api/menu/recommend/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ message: msg }),
       });
 

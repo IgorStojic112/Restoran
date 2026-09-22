@@ -67,7 +67,7 @@ function OrderPage() {
 
         {cart.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
-            <p className="text-gray-600">Narudžba Vam je prazna.</p>
+            <p className="text-gray-600">Narudžba je prazna.</p>
           </div>
           
         ) : (

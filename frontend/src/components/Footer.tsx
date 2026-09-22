@@ -9,7 +9,7 @@ function Footer(){
                 <div className="mr-[10%]">
                     <h1>Lokacija</h1>
                     <p>Grad: Mostar</p>
-                    <p>Adressa: Ante Starcevica b.b</p>
+                    <p>Adressa: Ante Starčevića b.b</p>
                 </div>
 
                 <div className="mr-[10%]">

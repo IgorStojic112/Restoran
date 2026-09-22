@@ -72,12 +72,12 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
             <div className="w-full px-6 py-4 flex items-center">
                 <div className="flex gap-8 items-center" > 
                     
-                    <div className="text-xl font-bold whitespace-nowrap">
+                    <div className="text-xl font-bold whitespace-nowrap relative cursor-pointer" onClick={() => {navigate('/home')}}>
                     Restoran Logo
                     </div>
 
                     <ul className="hidden lg:flex gap-8 whitespace-nowrap">
-                        <li onClick={() => {navigate('/home')}}>Dashboard</li>
+                        <li onClick={() => {navigate('/menuOrder')}} className="relative cursor-pointer">Menu</li>
                         <li onClick={() => navigate('/OrderPage')} className="relative cursor-pointer">
                         Narudžba
                         {cartCount > 0 && (
@@ -86,9 +86,9 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
                             </span>
                         )}
                         </li>
-                        <li onClick={() => navigate('/assistant')}>AI asistent</li>
-                        <li>O nama</li>
-                        <li>Kontakt</li>
+                        <li onClick={() => navigate('/assistant')} className="relative cursor-pointer">AI asistent</li>
+                        <li className="cursor-pointer">O nama</li>
+                        <li className="cursor-pointer">Kontakt</li>
                         {user && (user.role === "ADMIN" || user.role === "STAFF") && (
                             <li onClick={() => navigate('/admin')} className="cursor-pointer">Admin</li>
                         )}

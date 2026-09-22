@@ -69,7 +69,7 @@ function MenuOrder() {
                 image={`http://localhost:8000${item.Image}`}
                 title={item.Name}
                 description={item.Description}
-                price={item.Price}
+                price={item.Price+" €"}
               />
              </div>
              <DishQA dishId={item.id} dishName={item.Name} />

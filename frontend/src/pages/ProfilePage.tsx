@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContex";
 import defaultImage from "../assets/Pasta.jpg"
 import { useRef } from "react";
@@ -18,6 +18,13 @@ function ProfilePage(){
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imageError, setImageError] = useState("");
     const [uploading, setUploading] = useState(false);
+    const [ingredients, setIngredients] = useState<{id: number; Name: string; is_allergen: boolean}[]>([]);
+    const [preferencesText, setPreferencesText] = useState("");
+    const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[]>([]);
+    const [prefError, setPrefError] = useState("");
+    const [prefMessage, setPrefMessage] = useState("");
+    const [prefLoading, setPrefLoading] = useState(false);
+    const [prefSaving, setPrefSaving] = useState(false);
 
     
     const handleChangePassword = async (e) => {
@@ -115,6 +122,63 @@ function ProfilePage(){
             setUploading(false);
         }
     }
+
+    useEffect(() => {
+    setPrefLoading(true);
+    Promise.all([
+        fetch("http://127.0.0.1:8000/accounts/profile/", {
+            headers: { "Authorization": `Token ${token}` },
+            }).then(res => res.json()),
+            fetch("http://127.0.0.1:8000/api/ingredient/").then(res => res.json()),
+    ])
+        .then(([profileData, ingredientData]) => {
+            setPreferencesText(profileData.dietary_preferences || "");
+            setSelectedAllergyIds(profileData.allergies.map((a: {id: number}) => a.id));
+            setIngredients(ingredientData);
+        })
+            .catch(() => setPrefError("Greška pri učitavanju preferencija"))
+            .finally(() => setPrefLoading(false));
+    }, [token]);
+
+    const toggleAllergy = (id: number) => {
+        setSelectedAllergyIds(prev =>
+            prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+        );
+    };
+
+    const handleSavePreferences = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPrefError("");
+        setPrefMessage("");
+        setPrefSaving(true);
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/accounts/profile/", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Token ${token}`,
+            },
+            body: JSON.stringify({
+                dietary_preferences: preferencesText,
+                allergy_ids: selectedAllergyIds,
+            }),
+            });
+
+            if (!response.ok) {
+            setPrefError("Greška pri spremanju preferencija");
+            return;
+            }
+
+            setPrefMessage("Preferencije su spremljene");
+        } catch (err) {
+            setPrefError("Došlo je do greške. Pokušajte ponovo");
+        } finally {
+            setPrefSaving(false);
+        }
+    };
+
+    const allergenOptions = ingredients.filter(i => i.is_allergen);
     
     return (
         
@@ -258,6 +322,68 @@ function ProfilePage(){
                         
                     </form>
                 </div>
+                <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 className="text-lg font-medium text-slate-900">Prehrambene preferencije i alergije</h2>
+  <p className="mt-1 text-sm text-slate-500">
+    Ove informacije koristi AI asistent kako bi vam preporučio jela koja vam odgovaraju.
+  </p>
+
+  {prefLoading ? (
+    <p className="mt-4 text-sm text-slate-400">Učitavanje...</p>
+  ) : (
+    <form onSubmit={handleSavePreferences} className="mt-6 space-y-5">
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">
+          Opišite svoje prehrambene navike i želje
+        </label>
+        <textarea
+          value={preferencesText}
+          onChange={(e) => setPreferencesText(e.target.value)}
+          placeholder="npr. vegetarijanac sam, volim začinjenu hranu, izbjegavam mliječne proizvode"
+          rows={3}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">
+          Alergeni koje trebate izbjegavati
+        </label>
+        {allergenOptions.length === 0 ? (
+          <p className="text-sm text-slate-400">Trenutno nema označenih alergena u bazi.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {allergenOptions.map(ing => (
+              <label
+                key={ing.id}
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 has-[:checked]:border-red-500 has-[:checked]:bg-red-50 has-[:checked]:text-red-800"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedAllergyIds.includes(ing.id)}
+                  onChange={() => toggleAllergy(ing.id)}
+                  className="h-4 w-4 rounded border-gray-300 accent-red-600"
+                />
+                {ing.Name}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {prefError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{prefError}</p>}
+      {prefMessage && <p role="status" className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{prefMessage}</p>}
+
+      <button
+        type="submit"
+        disabled={prefSaving}
+        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+      >
+        {prefSaving ? "Spremanje..." : "Spremi preferencije"}
+      </button>
+    </form>
+  )}
+</div>
             </div>
         </div>
     )

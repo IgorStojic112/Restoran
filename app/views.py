@@ -15,6 +15,7 @@ import json
 from google import genai
 from google.genai import types
 from django.conf import settings
+from rest_framework.permissions import AllowAny
 
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
@@ -289,12 +290,30 @@ def dish_qa(request, dish_id):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def recommend_dishes(request):
     message = request.data.get("message", "").strip()
     if not message:
         return Response({"error": "Poruka je obavezna"}, status=400)
 
     dishes = MeniItem.objects.filter(Available=True).prefetch_related("Ingredient")
+
+    user_context = ""
+    if request.user.is_authenticated:
+        user = request.user
+        allergies = list(user.allergies.all())
+
+        if allergies:
+            dishes = dishes.exclude(Ingredient__in=allergies).distinct()
+
+        context_parts = []
+        if user.dietary_preferences:
+            context_parts.append(f"Korisnikove prehrambene preferencije: {user.dietary_preferences}.")
+        if allergies:
+            allergy_names = ", ".join(a.Name for a in allergies)
+            context_parts.append(f"Jela s ovim alergenima su već isključena iz ponude: {allergy_names}.")
+        user_context = " ".join(context_parts)
+
     if not dishes.exists():
         return Response({"recommendations": []})
 
@@ -311,11 +330,13 @@ def recommend_dishes(request):
 
     prompt = f"""Ti si asistent za preporuku jela u restoranu. Ispod je popis dostupnih jela.
 
-            {menu_text}
+                {menu_text}
 
-            Korisnikov upit: "{message}"
+                {user_context}
 
-            Odaberi do 3 jela s popisa koja najbolje odgovaraju korisnikovom upitu. Koristi isključivo ID-eve jela s popisa iznad. Za svako odabrano jelo napiši kratko objašnjenje (jedna rečenica) zašto odgovara upitu, na hrvatskom jeziku."""
+                Korisnikov upit: "{message}"
+
+                Odaberi do 3 jela s popisa koja najbolje odgovaraju korisnikovom upitu. Koristi isključivo ID-eve jela s popisa iznad. Za svako odabrano jelo napiši kratko objašnjenje (jedna rečenica) zašto odgovara upitu, na hrvatskom jeziku."""
 
     response_schema = types.Schema(
         type=types.Type.OBJECT,
