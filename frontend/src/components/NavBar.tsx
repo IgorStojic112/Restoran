@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { type User, useAuth } from "../context/AuthContex";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../context/NotificationContext";
+import { useCart } from "../context/CartContext";
 
 interface NavBarProps {
     onSearch: ((value: string) => void) | null;
@@ -59,6 +60,8 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
     const navigate = useNavigate();
     const [profileOpen, setProfileOpen] = useState(false);
     const { notifications, unreadCount, markAllRead } = useNotifications();
+    const { cart } = useCart();
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     const [bellOpen, setBellOpen] = useState(false);
 
     const { user, logout } = useAuth();
@@ -75,9 +78,15 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
 
                     <ul className="hidden lg:flex gap-8 whitespace-nowrap">
                         <li onClick={() => {navigate('/home')}}>Dashborad</li>
-                        <li onClick={() => {navigate('/OrderPage')}}> Narudzba</li>
-                        <li>AI asistent</li>
-                        <li>Naoredna pretraga</li>
+                        <li onClick={() => navigate('/OrderPage')} className="relative cursor-pointer">
+                        Narudžba
+                        {cartCount > 0 && (
+                            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                            {cartCount > 9 ? "9+" : cartCount}
+                            </span>
+                        )}
+                        </li>
+                        <li onClick={() => navigate('/assistant')}>AI asistent</li>
                         <li>O nama</li>
                         <li>Kontakt</li>
                     </ul>
