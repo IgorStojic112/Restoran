@@ -58,6 +58,9 @@ def ingredient_list(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_meni_item(request):
+    if request.user.role not in ("ADMIN", "STAFF"):
+        return Response({"error": "Nemate dozvolu za ovu akciju"}, status=403)
+
     
     data = request.data
     data._mutable = True

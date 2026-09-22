@@ -9,7 +9,7 @@ function CreateMenuItem(){
     const [ingredient, setIngredient] = useState([]);
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [isNewCategory, setIsNewCategory] = useState(false);
-    const { user } = useAuth();
+    const { user, token } = useAuth();
 
 
     const inputClass = "block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600/30";
@@ -62,6 +62,9 @@ function CreateMenuItem(){
             "http://localhost:8000/api/menu/add/",
             {
                 method: "POST",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                },
                 body: formData,
             }
         );
