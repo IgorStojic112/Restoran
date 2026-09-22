@@ -14,6 +14,7 @@ interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
   markAllRead: () => void;
+  newOrderSignal: number;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -22,6 +23,7 @@ export function NotificationProvider({ children }) {
   const { token } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
+  const [newOrderSignal, setNewOrderSignal] = useState(0);
 
   useEffect(() => {
     if (!token) {
@@ -45,7 +47,9 @@ export function NotificationProvider({ children }) {
           timestamp: new Date().toISOString(),
           read: false,
         }, ...prev]);
-      }
+      } else if (data.type === "new_order") {
+          setNewOrderSignal(prev => prev + 1);
+  }
     };
 
     ws.onerror = (err) => console.error("WebSocket error:", err);
@@ -59,7 +63,7 @@ export function NotificationProvider({ children }) {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, newOrderSignal }}>
       {children}
     </NotificationContext.Provider>
   );

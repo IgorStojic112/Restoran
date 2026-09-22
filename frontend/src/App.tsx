@@ -13,7 +13,7 @@ import MenuOrder from './pages/MenuOrder';
 import ProfilePage from './pages/ProfilePage';
 import OrderPage from './pages/OrderPage';
 import AIAssistant from './pages/AIAssistant';
-
+import AdminDashboard from './pages/AdminDashboard';
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from './components/ProtectedRoute';
 // <Route path="/" element={<LoginScreen />} />
@@ -37,6 +37,8 @@ function App() {
               <Route path='/createMeniItem' element={<CreateMenuItem/>} />
               <Route path='/addIngredient' element={<AddIngredients />} />
             </Route>
+
+            <Route path='/admin' element={<AdminDashboard />} />
             
             <Route path='/menuOrder' element={<MenuOrder />} />
             <Route path='/profilePage' element={<ProfilePage />} />

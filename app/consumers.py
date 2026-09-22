@@ -23,6 +23,13 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         self.group_name = f"user_{self.user.id}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
+
+        if self.user.role in ("ADMIN", "STAFF"):
+            await self.channel_layer.group_add("admin_orders", self.channel_name)
+        if hasattr(self, "user") and self.user.role in ("ADMIN", "STAFF"):
+            await self.channel_layer.group_discard("admin_orders", self.channel_name)
+
+
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -44,3 +51,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             if part.startswith("token="):
                 return part.split("=", 1)[1]
         return None
+
+    async def new_order(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "new_order",
+            "order_id": event["order_id"],
+    }))

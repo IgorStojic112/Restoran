@@ -92,7 +92,7 @@ function AIAssistant() {
           {recommendations.map(item => (
             <div key={item.id} className="border border-gray-100 rounded-xl overflow-hidden">
               <SpecialityCard
-                image={`http://localhost:8000/${item.Image}`}
+                image={`http://localhost:8000${item.Image}`}
                 title={item.Name}
                 description={item.Description}
                 price={item.Price}

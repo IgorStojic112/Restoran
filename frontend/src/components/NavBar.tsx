@@ -77,7 +77,7 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
                     </div>
 
                     <ul className="hidden lg:flex gap-8 whitespace-nowrap">
-                        <li onClick={() => {navigate('/home')}}>Dashborad</li>
+                        <li onClick={() => {navigate('/home')}}>Dashboard</li>
                         <li onClick={() => navigate('/OrderPage')} className="relative cursor-pointer">
                         Narudžba
                         {cartCount > 0 && (
@@ -89,7 +89,11 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
                         <li onClick={() => navigate('/assistant')}>AI asistent</li>
                         <li>O nama</li>
                         <li>Kontakt</li>
+                        {user && (user.role === "ADMIN" || user.role === "STAFF") && (
+                            <li onClick={() => navigate('/admin')} className="cursor-pointer">Admin</li>
+                        )}
                     </ul>
+                    
 
                 </div>
                 
@@ -169,6 +173,7 @@ function NavBar({ onSearch }: NavBarProps) { // user bio unutra
                                         onClick={ async () => {
                                             await logout();
                                             setProfileOpen(false);
+                                            navigate('/login');
                                         }}
                                         className="w-full text-left px-4 py-3 hover:bg-gray-100"
                                         >

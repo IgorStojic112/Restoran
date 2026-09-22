@@ -1,14 +1,14 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import render
-
+import time
 from Accounts.serializers import UserProfileSerializer
 from .serializers import MenuItemSerializer, CategorySerializer, IngredientSerializer
 from .models import MeniItem, Category, Ingredient, Order, OrderItem
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from decimal import Decimal
-
+from .serializers import MenuItemSerializer, CategorySerializer, IngredientSerializer, OrderSerializer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
@@ -149,6 +149,15 @@ def create_order(request):
     order.total_price = total_price
     order.save()
 
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "admin_orders",
+        {
+            "type": "new_order",
+            "order_id": order.id,
+        }
+    )
+
     return Response({
         "message": "Narudzba uspjesno predana",
         "order_id": order.id,
@@ -210,6 +219,35 @@ def profile_view(request):
         return Response(serializer.data)
     return Response(serializer.errors, status=400)
 
+FALLBACK_MODELS = ["gemini-3.6-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite"]
+
+def call_gemini_with_retry(prompt, response_schema=None, max_retries=2):
+    config_kwargs = {
+        "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True)
+    }
+    if response_schema:
+        config_kwargs["response_mime_type"] = "application/json"
+        config_kwargs["response_schema"] = response_schema
+
+    last_error = None
+    for model_name in FALLBACK_MODELS:
+        for attempt in range(max_retries):
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(**config_kwargs),
+                )
+                return response
+            except Exception as e:
+                last_error = e
+                print(f"Gemini attempt failed ({model_name}, try {attempt + 1}): {e}")
+                if "503" in str(e) or "UNAVAILABLE" in str(e):
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                break
+
+    raise last_error
 
 @api_view(["POST"])
 def dish_qa(request, dish_id):
@@ -298,19 +336,11 @@ def recommend_dishes(request):
     )
 
     try:
-        response = client.models.generate_content(
-            model="gemini-3.1-flash-lite",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=response_schema,
-                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-            ),
-        )
+        response = call_gemini_with_retry(prompt, response_schema=response_schema)
         result = json.loads(response.text)
     except Exception as e:
-        print(f"Gemini error: {e}")
-        return Response({"error": "AI servis trenutno nije dostupan"}, status=503)
+        print(f"Gemini error (all retries failed): {e}")
+        return Response({"error": "AI servis trenutno nije dostupan, pokušajte ponovno za par sekundi"}, status=503)
 
     recommendations = []
     for rec in result.get("recommendations", []):
@@ -322,3 +352,28 @@ def recommend_dishes(request):
         recommendations.append(data)
 
     return Response({"recommendations": recommendations})
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_menu_item(request, item_id):
+    if request.user.role not in ("ADMIN", "STAFF"):
+        return Response({"error": "Nemate dozvolu za ovu akciju"}, status=403)
+
+    try:
+        item = MeniItem.objects.get(id=item_id)
+    except MeniItem.DoesNotExist:
+        return Response({"error": "Jelo nije pronađeno"}, status=404)
+
+    item.delete()
+    return Response({"message": "Jelo je obrisano"}, status=204)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def order_list(request):
+    if request.user.role not in ("ADMIN", "STAFF"):
+        return Response({"error": "Nemate dozvolu za ovu akciju"}, status=403)
+
+    orders = Order.objects.select_related("user").prefetch_related("items__menu_item").order_by("-created_at")
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)

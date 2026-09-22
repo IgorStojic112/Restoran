@@ -18,9 +18,11 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    menu_item_name = serializers.CharField(source="menu_item.Name", read_only=True)
+
     class Meta:
         model = OrderItem
-        fields = ["menu_item", "quantity", "price"]
+        fields = ["menu_item", "menu_item_name", "quantity", "price"]
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
