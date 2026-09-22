@@ -1,3 +1,5 @@
+from app.models import MeniItem
+
 from .forms import *
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
@@ -16,6 +18,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import validate_email
 from .serializers import UserSerializer, LoginSerializer, UserProfileSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

@@ -4,6 +4,7 @@ import MenuNavBar from "../components/MenuNavBar";
 import SpecialityCard from "../components/SpecialityCard";
 import { useAuth } from "../context/AuthContex";
 import { useCart } from "../context/CartContext";
+import DishQA from "../components/DishQA";
 
 interface Category {
   id: number;
@@ -59,19 +60,21 @@ function MenuOrder() {
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {filteredItems.map(item => (
-            <div
-              key={item.id}
+            <div key={item.id} className="flex flex-col">
+              <div
               onClick={() => addToCart(item)}
               className="cursor-pointer"
-            >
+              >
               <SpecialityCard
                 image={`http://localhost:8000${item.Image}`}
                 title={item.Name}
                 description={item.Description}
                 price={item.Price}
               />
-            </div>
-          ))}
+             </div>
+             <DishQA dishId={item.id} dishName={item.Name} />
+          </div>
+            ))}
         </div>
       </div>
     </div>

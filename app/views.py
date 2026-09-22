@@ -1,6 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import render
+
+from Accounts.serializers import UserProfileSerializer
 from .serializers import MenuItemSerializer, CategorySerializer, IngredientSerializer
 from .models import MeniItem, Category, Ingredient, Order, OrderItem
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +11,12 @@ from decimal import Decimal
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+
+from google import genai
+from google.genai import types
+from django.conf import settings
+
+client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 
 def home(request):
@@ -185,3 +193,55 @@ def update_order_status(request, order_id):
 
     return Response({"order_id": order.id, "status": order.status})
 
+@api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    user = request.user
+    if request.method == "GET":
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
+
+    serializer = UserProfileSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["POST"])
+def dish_qa(request, dish_id):
+    try:
+        dish = MeniItem.objects.prefetch_related("Ingredient").get(id=dish_id)
+    except MeniItem.DoesNotExist:
+        return Response({"error": "Dish not found"}, status=404)
+
+    question = request.data.get("question", "").strip()
+    if not question:
+        return Response({"error": "Question is required"}, status=400)
+
+    ingredients = ", ".join(
+        i.Name for i in dish.Ingredient.all()
+    ) or "nisu navedeni"
+
+    prompt = f"""Ti si asistent u restoranu. Odgovaraj samo na pitanja vezana uz jelo.
+
+                Jelo: {dish.Name}
+                Opis: {dish.Description}
+                Sastojci: {ingredients}
+
+                Korisnikovo pitanje: {question}
+
+                Odgovori kratko i jasno na hrvatskom jeziku. Ako pitanje nije vezano uz ovo jelo ili restoran, ljubazno odbij odgovoriti."""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
+        ),
+)
+        return Response({"answer": response.text})
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        return Response({"error": "AI servis trenutno nije dostupan"}, status=503)
