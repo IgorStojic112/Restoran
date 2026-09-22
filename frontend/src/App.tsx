@@ -12,6 +12,7 @@ import AddIngredients from './pages/AddIngredinets';
 import MenuOrder from './pages/MenuOrder';
 import ProfilePage from './pages/ProfilePage';
 import OrderPage from './pages/OrderPage';
+import AIAssistant from './pages/AIAssistant';
 
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from './components/ProtectedRoute';
@@ -40,6 +41,8 @@ function App() {
             <Route path='/menuOrder' element={<MenuOrder />} />
             <Route path='/profilePage' element={<ProfilePage />} />
             <Route path='/OrderPage' element={<OrderPage />} />
+
+            <Route path='/assistant' element={<AIAssistant />} />
 
           </Routes>
         </NotificationProvider>

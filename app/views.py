@@ -11,7 +11,7 @@ from decimal import Decimal
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+import json
 from google import genai
 from google.genai import types
 from django.conf import settings
@@ -245,3 +245,77 @@ def dish_qa(request, dish_id):
     except Exception as e:
         print(f"Gemini error: {e}")
         return Response({"error": "AI servis trenutno nije dostupan"}, status=503)
+
+
+@api_view(["POST"])
+def recommend_dishes(request):
+    message = request.data.get("message", "").strip()
+    if not message:
+        return Response({"error": "Poruka je obavezna"}, status=400)
+
+    dishes = MeniItem.objects.filter(Available=True).prefetch_related("Ingredient")
+    if not dishes.exists():
+        return Response({"recommendations": []})
+
+    dish_map = {d.id: d for d in dishes}
+
+    menu_lines = []
+    for dish in dishes:
+        ingredients = ", ".join(i.Name for i in dish.Ingredient.all()) or "nisu navedeni"
+        menu_lines.append(
+            f"ID: {dish.id} | Naziv: {dish.Name} | Opis: {dish.Description} "
+            f"| Sastojci: {ingredients} | Cijena: {dish.Price}€"
+        )
+    menu_text = "\n".join(menu_lines)
+
+    prompt = f"""Ti si asistent za preporuku jela u restoranu. Ispod je popis dostupnih jela.
+
+            {menu_text}
+
+            Korisnikov upit: "{message}"
+
+            Odaberi do 3 jela s popisa koja najbolje odgovaraju korisnikovom upitu. Koristi isključivo ID-eve jela s popisa iznad. Za svako odabrano jelo napiši kratko objašnjenje (jedna rečenica) zašto odgovara upitu, na hrvatskom jeziku."""
+
+    response_schema = types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "recommendations": types.Schema(
+                type=types.Type.ARRAY,
+                items=types.Schema(
+                    type=types.Type.OBJECT,
+                    properties={
+                        "id": types.Schema(type=types.Type.INTEGER),
+                        "reason": types.Schema(type=types.Type.STRING),
+                    },
+                    required=["id", "reason"],
+                ),
+            )
+        },
+        required=["recommendations"],
+    )
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.1-flash-lite",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=response_schema,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            ),
+        )
+        result = json.loads(response.text)
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        return Response({"error": "AI servis trenutno nije dostupan"}, status=503)
+
+    recommendations = []
+    for rec in result.get("recommendations", []):
+        dish = dish_map.get(rec.get("id"))
+        if not dish:
+            continue
+        data = MenuItemSerializer(dish).data
+        data["reason"] = rec.get("reason", "")
+        recommendations.append(data)
+
+    return Response({"recommendations": recommendations})

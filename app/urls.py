@@ -14,4 +14,5 @@ urlpatterns = [
     path('api/orders/<int:order_id>/status/', views.update_order_status, name='update_order_status'),
 
     path("api/menu/<int:dish_id>/qa/", views.dish_qa, name="dish_qa"),
+    path("api/menu/recommend/", views.recommend_dishes, name="recommend_dishes"),
 ]
